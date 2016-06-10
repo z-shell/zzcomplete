@@ -71,7 +71,7 @@ zz-list "main" $(( term_height-3 )) $term_width "status" "3" "$term_width" "  Ma
 
 answer=${reply[REPLY]}
 tmp=( "${(z)answer}" )
-#echo $tmp[ZZLIST_CURRENT_SEGMENT]
+[[ "$ZZLIST_CURRENT_SEGMENT" -gt "${#tmp}" ]] && ZZLIST_CURRENT_SEGMENT="${#tmp}"
 ZZLIST_WRAPPER_BIT=$tmp[ZZLIST_CURRENT_SEGMENT]
 
 # vim:ft=zsh
