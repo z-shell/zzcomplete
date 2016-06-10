@@ -19,10 +19,16 @@ local ZZ_PB_SELECTED_WORD="" ZZ_PB_LEFT="" ZZ_PB_RIGHT=""
 zz-process-buffer "$BUFFER"
 
 # Select command for man
-local cmd="$ZZ_PB_WORDS[1]"
+integer i size="${#ZZ_PB_WORDS}"
+local cmd=""
+for (( i=1; i<=size; i++ )); do
+    [ "$cmd" = "" ] && cmd="${ZZ_PB_WORDS[i]}"
+    [ "$i" = "$ZZ_PB_SELECTED_WORD" ] && break
+    [ "$ZZ_PB_WORDS[i]" = ";" ] && cmd=""
+done
 
 local ZZLIST_WRAPPER_BIT=""
-zz-usetty-wrapper zz-list-wrapper ${(f)"$( man grep | col -b )"}
+zz-usetty-wrapper zz-list-wrapper ${(f)"$( man "$cmd" | col -b )"}
 
 #
 # Rebuilding buffer
