@@ -66,8 +66,16 @@ for (( i=1; i<=size; i++ )); do
             local empty=""
             ZZ_PB_SPACES[i+1]="${(l:cursor_spaces:: :)empty}"
             ZZ_PB_SPACES[i+2]="${(l:after_spaces:: :)empty}"
+
+            # Cursor will be at end of newly added word
+            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} ))
         else
             ZZ_PB_WORDS[i]="$ZZLIST_WRAPPER_BIT"
+
+            # Cursor will be at end of newly substituted word
+            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1 ))
+
+            # Update word beginnings of following words – skipped
         fi
     fi
     buf+="$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]"
@@ -76,13 +84,8 @@ done
 # Append final white spaces
 buf+="$ZZ_PB_SPACES[i]"
 BUFFER="$buf"
+CURSOR="$newcursor"
 
 zle redisplay
-
-#BUFFER="After word $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD] (compared: $pos > $((ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} -1)) )"
-#BUFFER="In word $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD] (compared: $pos > $((ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} -1)) )"
-#BUFFER="Your current word was: $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]"
-#BUFFER="$buf"
-#CURSOR="$newcursor"
 
 # vim:ft=zsh
