@@ -12,8 +12,8 @@ local curcontext=":zle:$WIDGET"
 local MATCH MBEGIN MEND i
 
 # Prepare output variables for zz-process-buffer
-local ZZ_PB_WORDS ZZ_PB_WORDS_BEGINNINGS ZZ_PB_SPACES
-local ZZ_PB_SELECTED_WORD ZZ_PB_LEFT ZZ_PB_RIGHT
+local ZZ_PB_WORDS="" ZZ_PB_WORDS_BEGINNINGS="" ZZ_PB_SPACES=""
+local ZZ_PB_SELECTED_WORD="" ZZ_PB_LEFT="" ZZ_PB_RIGHT=""
 
 # Process current buffer
 zz-process-buffer "$BUFFER"
@@ -77,8 +77,6 @@ done
 buf+="$ZZ_PB_SPACES[i]"
 BUFFER="$buf"
 
-echo "Got buffer $BUFFER" >> /tmp/reply
-echo "Was processing words ${ZZ_PB_WORDS[@]}" >> /tmp/reply
 zle redisplay
 
 #BUFFER="After word $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD] (compared: $pos > $((ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} -1)) )"

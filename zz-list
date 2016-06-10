@@ -23,7 +23,7 @@ zmodload zsh/terminfo 2>/dev/null && _zzlist_has_terminfo=1
 trap "REPLY=-2; reply=(); return" TERM INT QUIT
 
 # Drawing and input
-autoload zz-list-draw zz-list-input
+autoload zz-list-draw zz-list-input zz-process-buffer
 
 # Outputs a message in the bottom of the screen
 _zzlist_status_msg() {
@@ -118,22 +118,23 @@ _zzlist_mark_current_segment_in_current_element() {
         integer active_segment="$ZZLIST_CURRENT_SEGMENT"
         [[ "$active_segment" -gt "$nseg" ]] && active_segment="$nseg"
 
-        # Lets find interesting segment and mark it with bells (\7)
-        integer count=0
-        local i
-        for i in "${(z)element}"; do
-            count=count+1
-            if [[ "$count" -eq "$active_segment" ]]; then
-                # (z) replaces regular newlines with ;
-                # // in following line takes care of newlines
-                # from within strings
-                output+=$'\7'"${i//$'\n'/\\n}"$'\7'" "
-            else
-                output+="$i "
-            fi
-        done
+        # Prepare output variables for zz-process-buffer
+        local ZZ_PB_WORDS="" ZZ_PB_WORDS_BEGINNINGS="" ZZ_PB_SPACES=""
+        local ZZ_PB_SELECTED_WORD="" ZZ_PB_LEFT="" ZZ_PB_RIGHT=""
 
-        disp_list2[ZZLIST_CURRENT_PAGE_IDX]="${output% }"
+        # Lets find interesting segment and mark it with bells (\7)
+        zz-process-buffer "$element"
+        integer size="${#ZZ_PB_WORDS}" i
+        local buf=""
+        for (( i=1; i<=size; i++ )); do
+            if [[ "$i" -eq "$active_segment" ]]; then
+                ZZ_PB_WORDS[i]=$'\7'"${ZZ_PB_WORDS[i]//$'\n'/\\n}"$'\7'
+            fi
+            buf+="$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]"
+        done
+        buf+="$ZZ_PB_SPACES[i]"
+
+        disp_list2[ZZLIST_CURRENT_PAGE_IDX]="$buf"
 }
 
 #
