@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh
+
+zmodload zsh/curses
+
+integer term_height="$LINES"
+integer term_width="$COLUMNS"
+
+init_windows() {
+    zcurses init
+    zcurses delwin cmd 2>/dev/null
+    zcurses delwin main 2>/dev/null
+    zcurses delwin status 2>/dev/null
+    zcurses addwin main $(( term_height - 3 )) "$term_width" 0 0
+    zcurses addwin status "3" "$term_width" $(( term_height - 3 )) 0
+
+    bold=1
+    zcurses bg main "+bold" white/black
+    zcurses bg status "+bold" white/black
+}
+
+zcend() {
+    zcurses init
+    zcurses delwin cmd 2>/dev/null
+    zcurses delwin main 2>/dev/null
+    zcurses end
+}
+
+fpath+=( `pwd` )
+autoload h-list h-list-input h-list-draw
+
+init_windows
+
+zcurses border main
+zcurses border status
+
+h-list "main" $(( term_height-3 )) $term_width "status" "3" "$term_width" "  Man:  " "1" "$@"
+
+zcend
+
+answer=${reply[REPLY]}
+tmp=( "${(z)answer}" )
+#echo $tmp[HLIST_CURRENT_SEGMENT]
+HLIST_WRAPPER_BIT=$tmp[HLIST_CURRENT_SEGMENT]
+
+# vim:ft=zsh
