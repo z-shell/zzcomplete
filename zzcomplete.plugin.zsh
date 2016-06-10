@@ -5,6 +5,7 @@
 # to ~/.zshrc.
 #
 
+0="${(%):-%N}" # this gives immunity to functionargzero being unset
 REPO_DIR="${0%/*}"
 CONFIG_DIR="$HOME/.config/zzcomplete"
 
