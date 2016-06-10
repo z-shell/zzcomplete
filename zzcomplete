@@ -56,7 +56,7 @@ for (( i=1; i<=size; i++ )); do
             # It doesn't have word beginnings and spaces assigned
             # It has to take spaces from word next to it, i+2
             ZZ_PB_WORDS[i+1]="$ZZLIST_WRAPPER_BIT"
-            ZZ_PB_WORDS_BEGINNINGS[i+1]="$pos"
+            ZZ_PB_WORDS_BEGINNINGS[i+1]="$(( pos + 1 ))"
 
             # Now split spaces
             # cursor_spaces: spaces from current word to the cursor
@@ -68,7 +68,8 @@ for (( i=1; i<=size; i++ )); do
             ZZ_PB_SPACES[i+2]="${(l:after_spaces:: :)empty}"
 
             # Cursor will be at end of newly added word
-            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} ))
+            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} - 1 ))
+
         else
             ZZ_PB_WORDS[i]="$ZZLIST_WRAPPER_BIT"
 
