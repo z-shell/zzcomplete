@@ -26,20 +26,20 @@ zcend() {
 }
 
 fpath+=( `pwd` )
-autoload h-list h-list-input h-list-draw
+autoload zz-list zz-list-input zz-list-draw
 
 init_windows
 
 zcurses border main
 zcurses border status
 
-h-list "main" $(( term_height-3 )) $term_width "status" "3" "$term_width" "  Man:  " "1" "$@"
+zz-list "main" $(( term_height-3 )) $term_width "status" "3" "$term_width" "  Man:  " "1" "$@"
 
 zcend
 
 answer=${reply[REPLY]}
 tmp=( "${(z)answer}" )
-#echo $tmp[HLIST_CURRENT_SEGMENT]
-HLIST_WRAPPER_BIT=$tmp[HLIST_CURRENT_SEGMENT]
+#echo $tmp[ZZLIST_CURRENT_SEGMENT]
+ZZLIST_WRAPPER_BIT=$tmp[ZZLIST_CURRENT_SEGMENT]
 
 # vim:ft=zsh

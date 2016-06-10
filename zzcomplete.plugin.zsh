@@ -18,7 +18,7 @@ if [[ -z "$ZPLG_CUR_PLUGIN" && "${fpath[(r)$REPO_DIR]}" != $REPO_DIR ]]; then
     fpath+=( "$REPO_DIR" )
 fi
 
-autoload zew-process-buffer zz-usetty-wrapper h-list h-list-input h-list-draw h-list-wrapper zzcomplete
+autoload zz-process-buffer zz-usetty-wrapper zz-list zz-list-input zz-list-draw zz-list-wrapper zzcomplete
 
 zle -N zzcomplete
 bindkey '^F' zzcomplete

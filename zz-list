@@ -3,7 +3,7 @@
 # $4 - optional status window name
 # $5, $6 - width and height of the window
 #
-# $HLIST_NONSELECTABLE_ELEMENTS - array of indexes (1-based) that cannot be selected
+# $ZZLIST_NONSELECTABLE_ELEMENTS - array of indexes (1-based) that cannot be selected
 # $REPLY is the output variable - contains index (1-based) or -1 when no selection
 # $reply (array) is the second part of the output - use the index (REPLY) to get selected element
 #
@@ -15,18 +15,18 @@ emulate -LR zsh
 
 setopt typesetsilent extendedglob noshortloops
 
-_hlist_has_terminfo=0
+_zzlist_has_terminfo=0
 
 zmodload zsh/curses
-zmodload zsh/terminfo 2>/dev/null && _hlist_has_terminfo=1
+zmodload zsh/terminfo 2>/dev/null && _zzlist_has_terminfo=1
 
 trap "REPLY=-2; reply=(); return" TERM INT QUIT
 
 # Drawing and input
-autoload h-list-draw h-list-input
+autoload zz-list-draw zz-list-input
 
 # Outputs a message in the bottom of the screen
-_hlist_status_msg() {
+_zzlist_status_msg() {
     # -1 for border, -1 for 0-based indexing
     zcurses move "$wname_status" 1 2
     zcurses clear "$wname_status" eol
@@ -37,7 +37,7 @@ _hlist_status_msg() {
 
 # $1 is window name, $2 is the expected cursor state (0 invisible, 1 visible)
 # Prefer tput, then module terminfo
-_hlist_cursor_visibility() {
+_zzlist_cursor_visibility() {
     # If $1 = plain, then just output the
     # codes without any state management
     if [ "$1" != "plain" ]; then
@@ -49,73 +49,73 @@ _hlist_cursor_visibility() {
     if type tput 2>/dev/null 1>&2; then
         [ "$2" = "1" ] && { tput cvvis; tput cnorm }
         [ "$2" = "0" ] && tput civis
-    elif [ "$_hlist_has_terminfo" = "1" ]; then
+    elif [ "$_zzlist_has_terminfo" = "1" ]; then
         [ "$2" = "1" ] && { [ -n $terminfo[cvvis] ] && echo -n $terminfo[cvvis];
                            [ -n $terminfo[cnorm] ] && echo -n $terminfo[cnorm] }
         [ "$2" = "0" ] && [ -n $terminfo[civis] ] && echo -n $terminfo[civis]
     fi 
 }
 
-_hlist_compute_user_vars_difference() {
-        if [[ "${(t)HLIST_NONSELECTABLE_ELEMENTS}" != "array" &&
-                "${(t)HLIST_NONSELECTABLE_ELEMENTS}" != "array-local" ]]
+_zzlist_compute_user_vars_difference() {
+        if [[ "${(t)ZZLIST_NONSELECTABLE_ELEMENTS}" != "array" &&
+                "${(t)ZZLIST_NONSELECTABLE_ELEMENTS}" != "array-local" ]]
         then
             last_element_difference=0
             current_difference=0
         else
-            last_element_difference=$#HLIST_NONSELECTABLE_ELEMENTS
+            last_element_difference=$#ZZLIST_NONSELECTABLE_ELEMENTS
             current_difference=0
             local idx
-            for idx in "${(n)HLIST_NONSELECTABLE_ELEMENTS[@]}"; do
-                [ "$idx" -le "$HLIST_CURRENT_IDX" ] && current_difference+=1 || break
+            for idx in "${(n)ZZLIST_NONSELECTABLE_ELEMENTS[@]}"; do
+                [ "$idx" -le "$ZZLIST_CURRENT_IDX" ] && current_difference+=1 || break
             done
         fi
 }
 
 # List was processed, check if variables aren't off range
-_hlist_verify_vars() {
-    [ "$HLIST_CURRENT_IDX" -gt "$last_element" ] && HLIST_CURRENT_IDX="$last_element"
-    [[ "$HLIST_CURRENT_IDX" -eq 0 && "$last_element" -ne 0 ]] && HLIST_CURRENT_IDX=1
-    (( HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN=0+((HLIST_CURRENT_IDX-1)/page_height)*page_height+1 ))
+_zzlist_verify_vars() {
+    [ "$ZZLIST_CURRENT_IDX" -gt "$last_element" ] && ZZLIST_CURRENT_IDX="$last_element"
+    [[ "$ZZLIST_CURRENT_IDX" -eq 0 && "$last_element" -ne 0 ]] && ZZLIST_CURRENT_IDX=1
+    (( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN=0+((ZZLIST_CURRENT_IDX-1)/page_height)*page_height+1 ))
 }
 
 # Compute the variables which are shown to the user
-_hlist_setup_user_vars() {
+_zzlist_setup_user_vars() {
     if [ "$1" = "1" ]; then
         # Basic values when there are no non-selectables
-        HLIST_USER_CURRENT_IDX="$HLIST_CURRENT_IDX"
-        HLIST_USER_LAST_ELEMENT="$last_element"
+        ZZLIST_USER_CURRENT_IDX="$ZZLIST_CURRENT_IDX"
+        ZZLIST_USER_LAST_ELEMENT="$last_element"
     else
-        _hlist_compute_user_vars_difference
-        HLIST_USER_CURRENT_IDX=$(( HLIST_CURRENT_IDX - current_difference ))
-        HLIST_USER_LAST_ELEMENT=$(( last_element - last_element_difference ))
+        _zzlist_compute_user_vars_difference
+        ZZLIST_USER_CURRENT_IDX=$(( ZZLIST_CURRENT_IDX - current_difference ))
+        ZZLIST_USER_LAST_ELEMENT=$(( last_element - last_element_difference ))
     fi
 }
 
-_hlist_colorify_disp_list() {
+_zzlist_colorify_disp_list() {
     local col=$'\x1b[00;34m' reset=$'\x1b[0m'
-    [ -n "$HLIST_COLORING_COLOR" ] && col="$HLIST_COLORING_COLOR"
-    [ -n "$HLIST_COLORING_END_COLOR" ] && reset="$HLIST_COLORING_END_COLOR"
+    [ -n "$ZZLIST_COLORING_COLOR" ] && col="$ZZLIST_COLORING_COLOR"
+    [ -n "$ZZLIST_COLORING_END_COLOR" ] && reset="$ZZLIST_COLORING_END_COLOR"
 
-    if [ "$HLIST_COLORING_MATCH_MULTIPLE" -eq 1 ]; then
-        disp_list=( "${(@)disp_list//(#mi)$~HLIST_COLORING_PATTERN/$col${MATCH}$reset}" )
+    if [ "$ZZLIST_COLORING_MATCH_MULTIPLE" -eq 1 ]; then
+        disp_list=( "${(@)disp_list//(#mi)$~ZZLIST_COLORING_PATTERN/$col${MATCH}$reset}" )
     else
-        disp_list=( "${(@)disp_list/(#mi)$~HLIST_COLORING_PATTERN/$col${MATCH}$reset}" )
+        disp_list=( "${(@)disp_list/(#mi)$~ZZLIST_COLORING_PATTERN/$col${MATCH}$reset}" )
     fi
 }
 
-_hlist_mark_current_segment_in_current_element() {
-        # Check if current element is in HLIST_NONSELECTABLE_ELEMENTS
+_zzlist_mark_current_segment_in_current_element() {
+        # Check if current element is in ZZLIST_NONSELECTABLE_ELEMENTS
         # If yes, don't mark current segment
-        [ "${HLIST_NONSELECTABLE_ELEMENTS[(r)$HLIST_CURRENT_IDX]}" = "$HLIST_CURRENT_IDX" ] && return
+        [ "${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$ZZLIST_CURRENT_IDX]}" = "$ZZLIST_CURRENT_IDX" ] && return
 
         # There will be no colorifying for current element
-        integer HLIST_CURRENT_PAGE_IDX=$(( (HLIST_CURRENT_IDX-1)%page_height+1 ))
-        local element="$list[HLIST_CURRENT_IDX]"
+        integer ZZLIST_CURRENT_PAGE_IDX=$(( (ZZLIST_CURRENT_IDX-1)%page_height+1 ))
+        local element="$list[ZZLIST_CURRENT_IDX]"
         local output=""
 
-        [[ "$HLIST_CURRENT_SEGMENT" -lt 1 ]] && HLIST_CURRENT_SEGMENT=1
-        integer active_segment="$HLIST_CURRENT_SEGMENT"
+        [[ "$ZZLIST_CURRENT_SEGMENT" -lt 1 ]] && ZZLIST_CURRENT_SEGMENT=1
+        integer active_segment="$ZZLIST_CURRENT_SEGMENT"
         [[ "$active_segment" -gt "$nseg" ]] && active_segment="$nseg"
 
         # Lets find interesting segment and mark it with bells (\7)
@@ -133,7 +133,7 @@ _hlist_mark_current_segment_in_current_element() {
             fi
         done
 
-        disp_list2[HLIST_CURRENT_PAGE_IDX]="${output% }"
+        disp_list2[ZZLIST_CURRENT_PAGE_IDX]="${output% }"
 }
 
 #
@@ -142,7 +142,7 @@ _hlist_mark_current_segment_in_current_element() {
 
 # Check if there is proper input
 if [ "$#" -lt 1 ]; then
-    echo "Usage: h-list element_1 ..."
+    echo "Usage: zz-list element_1 ..."
     return 1
 fi
 
@@ -182,40 +182,40 @@ local boldattr
 [ "$bold" = "0" ] && boldattr="" || boldattr="+bold"
 
 # Ability to remember the list between calls
-if [[ -z "$HLIST_REMEMBER_STATE" || "$HLIST_REMEMBER_STATE" -eq 0 || "$HLIST_REMEMBER_STATE" -eq 2 ]]; then
-    HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN=1
-    HLIST_CURRENT_IDX=1
-    HLIST_IS_SEARCH_MODE=0
-    HLIST_SEARCH_BUFFER=""
-    HLIST_TEXT_OFFSET=0
-    HLIST_IS_UNIQ_MODE=0
-    HLIST_CURRENT_SEGMENT=1 # This variable is responsible for horizontal indexing
-    typeset -gA HLIST_ACTIVE_SEGMENTS
-    HLIST_ACTIVE_SEGMENTS=()
+if [[ -z "$ZZLIST_REMEMBER_STATE" || "$ZZLIST_REMEMBER_STATE" -eq 0 || "$ZZLIST_REMEMBER_STATE" -eq 2 ]]; then
+    ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN=1
+    ZZLIST_CURRENT_IDX=1
+    ZZLIST_IS_SEARCH_MODE=0
+    ZZLIST_SEARCH_BUFFER=""
+    ZZLIST_TEXT_OFFSET=0
+    ZZLIST_IS_UNIQ_MODE=0
+    ZZLIST_CURRENT_SEGMENT=1 # This variable is responsible for horizontal indexing
+    typeset -gA ZZLIST_ACTIVE_SEGMENTS
+    ZZLIST_ACTIVE_SEGMENTS=()
 
     # Zero - because it isn't known, unless we
     # confirm that first element is selectable
-    HLIST_USER_CURRENT_IDX=0
-    [[ ${HLIST_NONSELECTABLE_ELEMENTS[(r)1]} != 1 ]] && HLIST_USER_CURRENT_IDX=1
-    HLIST_USER_LAST_ELEMENT=$(( last_element - $#HLIST_NONSELECTABLE_ELEMENTS ))
+    ZZLIST_USER_CURRENT_IDX=0
+    [[ ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)1]} != 1 ]] && ZZLIST_USER_CURRENT_IDX=1
+    ZZLIST_USER_LAST_ELEMENT=$(( last_element - $#ZZLIST_NONSELECTABLE_ELEMENTS ))
 
     # 2 is init once, then remember
-    [ "$HLIST_REMEMBER_STATE" -eq 2 ] && HLIST_REMEMBER_STATE=1
+    [ "$ZZLIST_REMEMBER_STATE" -eq 2 ] && ZZLIST_REMEMBER_STATE=1
 fi
 
-if [ "$HLIST_START_IN_SEARCH_MODE" -eq 1 ]; then
-    HLIST_START_IN_SEARCH_MODE=0
-    HLIST_IS_SEARCH_MODE=1
+if [ "$ZZLIST_START_IN_SEARCH_MODE" -eq 1 ]; then
+    ZZLIST_START_IN_SEARCH_MODE=0
+    ZZLIST_IS_SEARCH_MODE=1
 fi
 
-if [ -n "$HLIST_SET_SEARCH_TO" ]; then
-    HLIST_SEARCH_BUFFER="$HLIST_SET_SEARCH_TO"
-    HLIST_SET_SEARCH_TO=""
+if [ -n "$ZZLIST_SET_SEARCH_TO" ]; then
+    ZZLIST_SEARCH_BUFFER="$ZZLIST_SET_SEARCH_TO"
+    ZZLIST_SET_SEARCH_TO=""
 fi
 
-if [ "$HLIST_START_IN_UNIQ_MODE" -eq 1 ]; then
-    HLIST_START_IN_UNIQ_MODE=0
-    HLIST_IS_UNIQ_MODE=1
+if [ "$ZZLIST_START_IN_UNIQ_MODE" -eq 1 ]; then
+    ZZLIST_START_IN_UNIQ_MODE=0
+    ZZLIST_IS_UNIQ_MODE=1
 fi
 
 #
@@ -240,11 +240,11 @@ last_element="$#list"
 
 while (( 1 )); do
     # Do searching (filtering with string)
-    if [ -n "$HLIST_SEARCH_BUFFER" ]; then
+    if [ -n "$ZZLIST_SEARCH_BUFFER" ]; then
         # Compute new list?
-        if [[ "$HLIST_SEARCH_BUFFER" != "$prev_search_buffer" || "$HLIST_IS_UNIQ_MODE" -ne "$prev_uniq_mode" ]]; then
-            prev_search_buffer="$HLIST_SEARCH_BUFFER"
-            prev_uniq_mode="$HLIST_IS_UNIQ_MODE"
+        if [[ "$ZZLIST_SEARCH_BUFFER" != "$prev_search_buffer" || "$ZZLIST_IS_UNIQ_MODE" -ne "$prev_uniq_mode" ]]; then
+            prev_search_buffer="$ZZLIST_SEARCH_BUFFER"
+            prev_uniq_mode="$ZZLIST_IS_UNIQ_MODE"
             # regenerating list -> regenerating disp_list
             prev_start_idx=-1
 
@@ -255,17 +255,17 @@ while (( 1 )); do
             done
 
             # Remove non-selectable elements
-            [ "$#HLIST_NONSELECTABLE_ELEMENTS" -gt 0 ] && for i in "${(nO)HLIST_NONSELECTABLE_ELEMENTS[@]}"; do
+            [ "$#ZZLIST_NONSELECTABLE_ELEMENTS" -gt 0 ] && for i in "${(nO)ZZLIST_NONSELECTABLE_ELEMENTS[@]}"; do
                 list[$i]=()
             done
 
             # Remove duplicates
-            [ "$HLIST_IS_UNIQ_MODE" -eq 1 ] && typeset -U list
+            [ "$ZZLIST_IS_UNIQ_MODE" -eq 1 ] && typeset -U list
 
             last_element="$#list"
 
             # Next do the filtering
-            local search_buffer="${HLIST_SEARCH_BUFFER%% ##}"
+            local search_buffer="${ZZLIST_SEARCH_BUFFER%% ##}"
             search_buffer="${search_buffer## ##}"
             search_buffer="${search_buffer//(#m)[][*?|#~^()><\\]/\\$MATCH}"
             local search_pattern=""
@@ -284,20 +284,20 @@ while (( 1 )); do
             fi
 
             # Called after processing list
-            _hlist_verify_vars
+            _zzlist_verify_vars
         fi
 
-        _hlist_setup_user_vars 1
+        _zzlist_setup_user_vars 1
         typeset -a tmp
-        tmp=( "${(z)list[HLIST_CURRENT_IDX]}" )
+        tmp=( "${(z)list[ZZLIST_CURRENT_IDX]}" )
         nseg="$#tmp"
 
-        integer end_idx=$(( HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + page_height - 1 ))
+        integer end_idx=$(( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + page_height - 1 ))
         [ "$end_idx" -gt "$last_element" ] && end_idx=last_element
 
-        if [ "$prev_start_idx" -ne "$HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" ]; then
-            prev_start_idx="$HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN"
-            disp_list=( "${(@)list[HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN, end_idx]}" )
+        if [ "$prev_start_idx" -ne "$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" ]; then
+            prev_start_idx="$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN"
+            disp_list=( "${(@)list[ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN, end_idx]}" )
 
             if [ -n "$colsearch_pattern" ]; then
                 local col=$'\x1b[00;35m' reset=$'\x1b[00;00m'
@@ -317,20 +317,20 @@ while (( 1 )); do
         # will be active
         disp_list2=( "${(@)disp_list2//$'\n'/;}" )
 
-        [ "$#disp_list2" -gt 0 ] && _hlist_mark_current_segment_in_current_element
+        [ "$#disp_list2" -gt 0 ] && _zzlist_mark_current_segment_in_current_element
 
         # Output colored list
-        h-list-draw "$(( (HLIST_CURRENT_IDX-1) % page_height + 1 ))" \
-            "$page_height" "$page_width" 1 2 "$HLIST_TEXT_OFFSET" "$wname_main" \
+        zz-list-draw "$(( (ZZLIST_CURRENT_IDX-1) % page_height + 1 ))" \
+            "$page_height" "$page_width" 1 2 "$ZZLIST_TEXT_OFFSET" "$wname_main" \
             "$disp_list2[@]"
     else
         # There is no search, but there was in previous loop
         # OR
         # Uniq mode was entered or left out
         # -> compute new list
-        if [[ -n "$prev_search_buffer" || "$HLIST_IS_UNIQ_MODE" -ne "$prev_uniq_mode" ]]; then
+        if [[ -n "$prev_search_buffer" || "$ZZLIST_IS_UNIQ_MODE" -ne "$prev_uniq_mode" ]]; then
             prev_search_buffer=""
-            prev_uniq_mode="$HLIST_IS_UNIQ_MODE"
+            prev_uniq_mode="$ZZLIST_IS_UNIQ_MODE"
             # regenerating list -> regenerating disp_list
             prev_start_idx=-1
 
@@ -341,33 +341,33 @@ while (( 1 )); do
             done
 
             # Remove non-selectable elements only when in uniq mode
-            [ "$HLIST_IS_UNIQ_MODE" -eq 1 ] && [ "$#HLIST_NONSELECTABLE_ELEMENTS" -gt 0 ] &&
-            for i in "${(nO)HLIST_NONSELECTABLE_ELEMENTS[@]}"; do
+            [ "$ZZLIST_IS_UNIQ_MODE" -eq 1 ] && [ "$#ZZLIST_NONSELECTABLE_ELEMENTS" -gt 0 ] &&
+            for i in "${(nO)ZZLIST_NONSELECTABLE_ELEMENTS[@]}"; do
                 list[$i]=()
             done
 
             # Remove duplicates when in uniq mode
-            [ "$HLIST_IS_UNIQ_MODE" -eq 1 ] && typeset -U list
+            [ "$ZZLIST_IS_UNIQ_MODE" -eq 1 ] && typeset -U list
 
             last_element="$#list"
             # Called after processing list
-            _hlist_verify_vars
+            _zzlist_verify_vars
         fi
 
         # "1" - shouldn't bother with non-selectables
-        _hlist_setup_user_vars "$HLIST_IS_UNIQ_MODE"
+        _zzlist_setup_user_vars "$ZZLIST_IS_UNIQ_MODE"
         typeset -a tmp
-        tmp=( "${(z)list[HLIST_CURRENT_IDX]}" )
+        tmp=( "${(z)list[ZZLIST_CURRENT_IDX]}" )
         nseg="$#tmp"
 
-        integer end_idx=$(( HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + page_height - 1 ))
+        integer end_idx=$(( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + page_height - 1 ))
         [ "$end_idx" -gt "$last_element" ] && end_idx=last_element
 
-        if [ "$prev_start_idx" -ne "$HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" ]; then
-            prev_start_idx="$HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN"
-            disp_list=( "${(@)list[HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN, end_idx]}" )
+        if [ "$prev_start_idx" -ne "$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" ]; then
+            prev_start_idx="$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN"
+            disp_list=( "${(@)list[ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN, end_idx]}" )
 
-            [ -n "$HLIST_COLORING_PATTERN" ] && _hlist_colorify_disp_list
+            [ -n "$ZZLIST_COLORING_PATTERN" ] && _zzlist_colorify_disp_list
         fi
 
         # We need second disp_list to be able to disable colorifying for particular elements
@@ -379,11 +379,11 @@ while (( 1 )); do
         # will be active
         disp_list2=( "${(@)disp_list2//$'\n'/;}" )
 
-        [ "$#disp_list2" -gt 0 ] && _hlist_mark_current_segment_in_current_element
+        [ "$#disp_list2" -gt 0 ] && _zzlist_mark_current_segment_in_current_element
 
         # Output the list
-        h-list-draw "$(( (HLIST_CURRENT_IDX-1) % page_height + 1 ))" \
-            "$page_height" "$page_width" 1 2 "$HLIST_TEXT_OFFSET" "$wname_main" \
+        zz-list-draw "$(( (ZZLIST_CURRENT_IDX-1) % page_height + 1 ))" \
+            "$page_height" "$page_width" 1 2 "$ZZLIST_TEXT_OFFSET" "$wname_main" \
             "$disp_list2[@]"
     fi
 
@@ -392,35 +392,35 @@ while (( 1 )); do
     zcurses move "$wname_main" 0 2
     zcurses string "$wname_main" "$header"
     [ "$mark_header" = "1" ] && zcurses attr "$wname_main" "$boldattr" white/black
-    _hlist_cursor_visibility "main" "0"
+    _zzlist_cursor_visibility "main" "0"
     zcurses refresh "$wname_main"
 
     # Status window is optional (1/2)
     [ -n "$wname_status" ] && {
         local status_msg_strlen
-        if [ "$HLIST_IS_SEARCH_MODE" = "1" ]; then
+        if [ "$ZZLIST_IS_SEARCH_MODE" = "1" ]; then
             local _txt2=""
-            [ "$HLIST_IS_UNIQ_MODE" -eq 1 ] && _txt2="[-UNIQ-] "
-            _hlist_status_msg "${_txt2}Filtering with: ${HLIST_SEARCH_BUFFER// /+}"
-        elif [[ ${HLIST_NONSELECTABLE_ELEMENTS[(r)$HLIST_CURRENT_IDX]} != $HLIST_CURRENT_IDX ||
-                -n "$HLIST_SEARCH_BUFFER" || "$HLIST_IS_UNIQ_MODE" -eq 1 ]]; then
+            [ "$ZZLIST_IS_UNIQ_MODE" -eq 1 ] && _txt2="[-UNIQ-] "
+            _zzlist_status_msg "${_txt2}Filtering with: ${ZZLIST_SEARCH_BUFFER// /+}"
+        elif [[ ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$ZZLIST_CURRENT_IDX]} != $ZZLIST_CURRENT_IDX ||
+                -n "$ZZLIST_SEARCH_BUFFER" || "$ZZLIST_IS_UNIQ_MODE" -eq 1 ]]; then
             local _txt="" _txt2=""
-            [ -n "$HLIST_GREP_STRING" ] && _txt=" [$HLIST_GREP_STRING]"
-            [ "$HLIST_IS_UNIQ_MODE" -eq 1 ] && _txt2="[-UNIQ-] "
-            _hlist_status_msg "${_txt2}Current #$HLIST_USER_CURRENT_IDX (of #$HLIST_USER_LAST_ELEMENT entries)$_txt"
+            [ -n "$ZZLIST_GREP_STRING" ] && _txt=" [$ZZLIST_GREP_STRING]"
+            [ "$ZZLIST_IS_UNIQ_MODE" -eq 1 ] && _txt2="[-UNIQ-] "
+            _zzlist_status_msg "${_txt2}Current #$ZZLIST_USER_CURRENT_IDX (of #$ZZLIST_USER_LAST_ELEMENT entries)$_txt"
         else
-            _hlist_status_msg ""
+            _zzlist_status_msg ""
         fi
 
         zcurses border "$wname_status"
-        # status_msg_strlen is set in _hlist_status_msg()
+        # status_msg_strlen is set in _zzlist_status_msg()
         zcurses move "$wname_status" 1 $(( status_msg_strlen + 2 ))
-        [ "$HLIST_IS_SEARCH_MODE" -ne 1 ] && _hlist_cursor_visibility "status" "0" || _hlist_cursor_visibility "status" "1"
+        [ "$ZZLIST_IS_SEARCH_MODE" -ne 1 ] && _zzlist_cursor_visibility "status" "0" || _zzlist_cursor_visibility "status" "1"
         zcurses refresh "$wname_status" 
     }
 
     # Draw only?
-    [ "$HLIST_DRAW_ONLY" = "1" ] && return
+    [ "$ZZLIST_DRAW_ONLY" = "1" ] && return
 
     # Wait for input
     zcurses input main key keypad
@@ -432,38 +432,38 @@ while (( 1 )); do
         final_key="$keypad"
     else
         [ -n "$wname_status" ] && {
-            _hlist_status_msg "Inproper input detected"
+            _zzlist_status_msg "Inproper input detected"
             zcurses refresh "$wname_status"
             sleep 2
         }
     fi
 
-    integer track_cur_idx="$HLIST_CURRENT_IDX"
-    h-list-input "$HLIST_CURRENT_IDX" "$HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" \
-                    "$page_height" "$page_width" "$last_element" "$nseg" "$HLIST_TEXT_OFFSET" \
-                    "$final_key" "$HLIST_IS_SEARCH_MODE" "$HLIST_SEARCH_BUFFER" \
-                    "$HLIST_IS_UNIQ_MODE" "$HLIST_DISABLE_SEARCH"
+    integer track_cur_idx="$ZZLIST_CURRENT_IDX"
+    zz-list-input "$ZZLIST_CURRENT_IDX" "$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" \
+                    "$page_height" "$page_width" "$last_element" "$nseg" "$ZZLIST_TEXT_OFFSET" \
+                    "$final_key" "$ZZLIST_IS_SEARCH_MODE" "$ZZLIST_SEARCH_BUFFER" \
+                    "$ZZLIST_IS_UNIQ_MODE" "$ZZLIST_DISABLE_SEARCH"
 
     selection="$reply[1]"
     action="$reply[2]"
-    HLIST_CURRENT_IDX="$reply[3]"
-    HLIST_FROM_WHAT_IDX_LIST_IS_SHOWN="$reply[4]"
-    HLIST_TEXT_OFFSET="$reply[5]"
-    HLIST_IS_SEARCH_MODE="$reply[6]"
-    HLIST_SEARCH_BUFFER="$reply[7]"
-    HLIST_IS_UNIQ_MODE="$reply[8]"
+    ZZLIST_CURRENT_IDX="$reply[3]"
+    ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN="$reply[4]"
+    ZZLIST_TEXT_OFFSET="$reply[5]"
+    ZZLIST_IS_SEARCH_MODE="$reply[6]"
+    ZZLIST_SEARCH_BUFFER="$reply[7]"
+    ZZLIST_IS_UNIQ_MODE="$reply[8]"
 
-    if [ "$HLIST_TRACK_SEGMENTS" = "1" ]; then
+    if [ "$ZZLIST_TRACK_SEGMENTS" = "1" ]; then
         # Remember segment change (element change and segment
         # change cannot occur at the same time)
-        HLIST_ACTIVE_SEGMENTS[$track_cur_idx]="$HLIST_CURRENT_SEGMENT"
+        ZZLIST_ACTIVE_SEGMENTS[$track_cur_idx]="$ZZLIST_CURRENT_SEGMENT"
 
-        if [[ "$track_cur_idx" != "$HLIST_CURRENT_IDX" ]]; then
+        if [[ "$track_cur_idx" != "$ZZLIST_CURRENT_IDX" ]]; then
             # Restore segment or set to 1
-            if (( ${+HLIST_ACTIVE_SEGMENTS[$HLIST_CURRENT_IDX]} )); then
-                HLIST_CURRENT_SEGMENT="${HLIST_ACTIVE_SEGMENTS[$HLIST_CURRENT_IDX]}"
+            if (( ${+ZZLIST_ACTIVE_SEGMENTS[$ZZLIST_CURRENT_IDX]} )); then
+                ZZLIST_CURRENT_SEGMENT="${ZZLIST_ACTIVE_SEGMENTS[$ZZLIST_CURRENT_IDX]}"
             else
-                HLIST_CURRENT_SEGMENT=1
+                ZZLIST_CURRENT_SEGMENT=1
             fi
         fi
     fi

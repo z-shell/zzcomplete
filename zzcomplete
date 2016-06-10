@@ -6,30 +6,30 @@
 
 setopt localoptions typesetsilent
 
-autoload zew-process-buffer zz-usetty-wrapper h-list h-list-input h-list-draw
+autoload zz-process-buffer zz-usetty-wrapper zz-list zz-list-input zz-list-draw
 
 local curcontext=":zle:$WIDGET"
 local MATCH MBEGIN MEND i
 
-# Prepare output variables for zew-process-buffer
-local ZEW_PB_WORDS ZEW_PB_WORDS_BEGINNINGS ZEW_PB_SPACES
-local ZEW_PB_SELECTED_WORD ZEW_PB_LEFT ZEW_PB_RIGHT
+# Prepare output variables for zz-process-buffer
+local ZZ_PB_WORDS ZZ_PB_WORDS_BEGINNINGS ZZ_PB_SPACES
+local ZZ_PB_SELECTED_WORD ZZ_PB_LEFT ZZ_PB_RIGHT
 
 # Process current buffer
-zew-process-buffer "$BUFFER"
+zz-process-buffer "$BUFFER"
 
 # Select command for man
-local cmd="$ZEW_PB_WORDS[1]"
+local cmd="$ZZ_PB_WORDS[1]"
 
-local HLIST_WRAPPER_BIT=""
-zz-usetty-wrapper h-list-wrapper ${(f)"$( man grep | col -b )"}
+local ZZLIST_WRAPPER_BIT=""
+zz-usetty-wrapper zz-list-wrapper ${(f)"$( man grep | col -b )"}
 
 #
 # Rebuilding buffer
 #
 
 integer pos="$CURSOR"
-integer size="${#ZEW_PB_WORDS}"
+integer size="${#ZZ_PB_WORDS}"
 integer newcursor
 buf=""
 
@@ -39,49 +39,51 @@ integer i j
 for (( i=1; i<=size; i++ )); do
     # Check if we're at (i.e. directly at or after,
     # when after are just spaces) current word
-    if [ "$i" = "$ZEW_PB_SELECTED_WORD" ]; then
+    if [ "$i" = "$ZZ_PB_SELECTED_WORD" ]; then
         # Check if we're at the word itself,
         # or at some distance after it
-        if (( pos > (ZEW_PB_WORDS_BEGINNINGS[i] + ${#ZEW_PB_WORDS[i]} - 1) )); then
+        if (( pos > (ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1) )); then
             # We need to introduce new word
             # First move all words and spaces forward
             for (( j=size; j>=i+1; j-- )); do
-                ZEW_PB_WORDS[j+1]="${ZEW_PB_WORDS[j]}"
-                ZEW_PB_SPACES[j+1]="${ZEW_PB_SPACES[j]}"
-                ZEW_PB_WORDS_BEGINNINGS[j+1]="${ZEW_PB_WORDS_BEGINNINGS[j]}"
+                ZZ_PB_WORDS[j+1]="${ZZ_PB_WORDS[j]}"
+                ZZ_PB_SPACES[j+1]="${ZZ_PB_SPACES[j]}"
+                ZZ_PB_WORDS_BEGINNINGS[j+1]="${ZZ_PB_WORDS_BEGINNINGS[j]}"
             done
             size+=1
 
             # New word is introduced at position i+1, after current word
             # It doesn't have word beginnings and spaces assigned
             # It has to take spaces from word next to it, i+2
-            ZEW_PB_WORDS[i+1]="$HLIST_WRAPPER_BIT"
-            ZEW_PB_WORDS_BEGINNINGS[i+1]="$pos"
+            ZZ_PB_WORDS[i+1]="$ZZLIST_WRAPPER_BIT"
+            ZZ_PB_WORDS_BEGINNINGS[i+1]="$pos"
 
             # Now split spaces
             # cursor_spaces: spaces from current word to the cursor
-            integer cursor_spaces=$(( pos - ZEW_PB_WORDS_BEGINNINGS[i] - ${#ZEW_PB_WORDS[i]} + 1 ))
+            integer cursor_spaces=$(( pos - ZZ_PB_WORDS_BEGINNINGS[i] - ${#ZZ_PB_WORDS[i]} + 1 ))
             # take that from spaces of word "next" in: current NEW next
-            integer after_spaces=$(( ZEW_PB_SPACES[i+2] - cursor_spaces ))
+            integer after_spaces=$(( ZZ_PB_SPACES[i+2] - cursor_spaces ))
             local empty=""
-            ZEW_PB_SPACES[i+1]="${(l:cursor_spaces:: :)empty}"
-            ZEW_PB_SPACES[i+2]="${(l:after_spaces:: :)empty}"
+            ZZ_PB_SPACES[i+1]="${(l:cursor_spaces:: :)empty}"
+            ZZ_PB_SPACES[i+2]="${(l:after_spaces:: :)empty}"
         else
-            ZEW_PB_WORDS[i]="$HLIST_WRAPPER_BIT"
+            ZZ_PB_WORDS[i]="$ZZLIST_WRAPPER_BIT"
         fi
     fi
-    buf+="$ZEW_PB_SPACES[i]$ZEW_PB_WORDS[i]"
+    buf+="$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]"
 done
 
 # Append final white spaces
-buf+="$ZEW_PB_SPACES[i]"
+buf+="$ZZ_PB_SPACES[i]"
 BUFFER="$buf"
 
+echo "Got buffer $BUFFER" >> /tmp/reply
+echo "Was processing words ${ZZ_PB_WORDS[@]}" >> /tmp/reply
 zle redisplay
 
-#BUFFER="After word $ZEW_PB_WORDS[ZEW_PB_SELECTED_WORD] (compared: $pos > $((ZEW_PB_WORDS_BEGINNINGS[i] + ${#ZEW_PB_WORDS[i]} -1)) )"
-#BUFFER="In word $ZEW_PB_WORDS[ZEW_PB_SELECTED_WORD] (compared: $pos > $((ZEW_PB_WORDS_BEGINNINGS[i] + ${#ZEW_PB_WORDS[i]} -1)) )"
-#BUFFER="Your current word was: $ZEW_PB_WORDS[ZEW_PB_SELECTED_WORD]"
+#BUFFER="After word $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD] (compared: $pos > $((ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} -1)) )"
+#BUFFER="In word $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD] (compared: $pos > $((ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} -1)) )"
+#BUFFER="Your current word was: $ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]"
 #BUFFER="$buf"
 #CURSOR="$newcursor"
 

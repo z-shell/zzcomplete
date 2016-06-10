@@ -1,8 +1,3 @@
-# Copy this file into /usr/share/zsh/site-functions/
-# and add 'autoload h-list-input` to .zshrc
-#
-# This is an internal function not for direct use
-
 emulate -L zsh
 
 zmodload zsh/curses
@@ -10,7 +5,7 @@ zmodload zsh/curses
 setopt typesetsilent
 
 # Compute first to show index
-_hlist_compute_first_to_show_idx() {
+_zzlist_compute_first_to_show_idx() {
     from_what_idx_list_is_shown=0+((current_idx-1)/page_height)*page_height+1
 }
 
@@ -39,46 +34,46 @@ case "$key" in
     (UP|k|$'\C-P')
         # Are there any elements before the current one?
         [ "$current_idx" -gt 1 ] && current_idx=current_idx-1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (DOWN|j|$'\C-N')
         # Are there any elements after the current one?
         [ "$current_idx" -lt "$last_element" ] && current_idx=current_idx+1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (PPAGE|$'\b'|$'\C-?'|BACKSPACE)
         current_idx=current_idx-page_height
         [ "$current_idx" -lt 1 ] && current_idx=1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (NPAGE|" ")
         current_idx=current_idx+page_height
         [ "$current_idx" -gt "$last_element" ] && current_idx=last_element;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     ($'\C-U')
         current_idx=current_idx-page_height/2
         [ "$current_idx" -lt 1 ] && current_idx=1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     ($'\C-D')
         current_idx=current_idx+page_height/2
         [ "$current_idx" -gt "$last_element" ] && current_idx=last_element;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (HOME|g)
         current_idx=1
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (END|G)
         current_idx=last_element
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     ($'\n'|ENTER)
         # Is that element selectable?
         # Check for this only when there is no search
-        if [[ "$HLIST_SEARCH_BUFFER" != "" || "$HLIST_IS_UNIQ_MODE" -eq 1 ||
-            ${HLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} != $current_idx ]]
+        if [[ "$ZZLIST_SEARCH_BUFFER" != "" || "$ZZLIST_IS_UNIQ_MODE" -eq 1 ||
+            ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} != $current_idx ]]
         then
             # Save current element in the result variable
             reply=( $current_idx SELECT )
@@ -90,7 +85,7 @@ case "$key" in
     (/)
         if [ "$disable_search" = "0" ]; then
             search=1
-            _hlist_cursor_visibility 1
+            _zzlist_cursor_visibility 1
         fi
         ;;
     ($'\t')
@@ -100,16 +95,16 @@ case "$key" in
         reply=( -1 REDRAW )
         ;;
     (\])
-        if [[ "${HLIST_ENABLED_EVENTS[(r)BR_MOVE_RIGHT]}" = "BR_MOVE_RIGHT" ]]; then
-            reply=( "$HLIST_CURRENT_SEGMENT" "BR_MOVE_RIGHT" )
+        if [[ "${ZZLIST_ENABLED_EVENTS[(r)BR_MOVE_RIGHT]}" = "BR_MOVE_RIGHT" ]]; then
+            reply=( "$ZZLIST_CURRENT_SEGMENT" "BR_MOVE_RIGHT" )
         else
 
-        [[ "${(t)HLIST_HOP_INDEXES}" = "array" || "${(t)HLIST_HOP_INDEXES}" = "array-local" ]] &&
-        [ -z "$HLIST_SEARCH_BUFFER" ] && [ "$HLIST_IS_UNIQ_MODE" -eq 0 ] &&
-        for idx in "${(n)HLIST_HOP_INDEXES[@]}"; do
+        [[ "${(t)ZZLIST_HOP_INDEXES}" = "array" || "${(t)ZZLIST_HOP_INDEXES}" = "array-local" ]] &&
+        [ -z "$ZZLIST_SEARCH_BUFFER" ] && [ "$ZZLIST_IS_UNIQ_MODE" -eq 0 ] &&
+        for idx in "${(n)ZZLIST_HOP_INDEXES[@]}"; do
             if [ "$idx" -gt "$current_idx" ]; then
                 current_idx=$idx
-                _hlist_compute_first_to_show_idx
+                _zzlist_compute_first_to_show_idx
                 break
             fi
         done
@@ -117,16 +112,16 @@ case "$key" in
         fi
         ;;
     (\[)
-        if [[ "${HLIST_ENABLED_EVENTS[(r)BR_MOVE_LEFT]}" = "BR_MOVE_LEFT" ]]; then
-            reply=( "$HLIST_CURRENT_SEGMENT" "BR_MOVE_LEFT" )
+        if [[ "${ZZLIST_ENABLED_EVENTS[(r)BR_MOVE_LEFT]}" = "BR_MOVE_LEFT" ]]; then
+            reply=( "$ZZLIST_CURRENT_SEGMENT" "BR_MOVE_LEFT" )
         else
 
-        [[ "${(t)HLIST_HOP_INDEXES}" = "array" || "${(t)HLIST_HOP_INDEXES}" = "array-local" ]] &&
-        [ -z "$HLIST_SEARCH_BUFFER" ] && [ "$HLIST_IS_UNIQ_MODE" -eq 0 ] &&
-        for idx in "${(nO)HLIST_HOP_INDEXES[@]}"; do
+        [[ "${(t)ZZLIST_HOP_INDEXES}" = "array" || "${(t)ZZLIST_HOP_INDEXES}" = "array-local" ]] &&
+        [ -z "$ZZLIST_SEARCH_BUFFER" ] && [ "$ZZLIST_IS_UNIQ_MODE" -eq 0 ] &&
+        for idx in "${(nO)ZZLIST_HOP_INDEXES[@]}"; do
             if [ "$idx" -lt "$current_idx" ]; then
                 current_idx=$idx
-                _hlist_compute_first_to_show_idx
+                _zzlist_compute_first_to_show_idx
                 break
             fi
         done
@@ -141,22 +136,22 @@ case "$key" in
         hscroll+=7
         ;;
     (LEFT|'h')
-        if [ "$HLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
-            (( HLIST_CURRENT_SEGMENT = nseg - 1 ))
-            [ "$HLIST_CURRENT_SEGMENT" -le 0 ] && HLIST_CURRENT_SEGMENT=1
+        if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
+            (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
+            [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
         else
-            (( HLIST_CURRENT_SEGMENT = HLIST_CURRENT_SEGMENT - 1 ))
+            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
         fi
         ;;
     (RIGHT|'l')
-        (( HLIST_CURRENT_SEGMENT = HLIST_CURRENT_SEGMENT + 1 ))
-        [ "$HLIST_CURRENT_SEGMENT" -gt "$nseg" ] && HLIST_CURRENT_SEGMENT="$nseg"
+        (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
+        [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
         ;;
     (SLEFT|'H')
-        reply=( "$HLIST_CURRENT_SEGMENT" MOVE_LEFT )
+        reply=( "$ZZLIST_CURRENT_SEGMENT" MOVE_LEFT )
         ;;
     (SRIGHT|'L')
-        reply=( "$HLIST_CURRENT_SEGMENT" MOVE_RIGHT )
+        reply=( "$ZZLIST_CURRENT_SEGMENT" MOVE_RIGHT )
         ;;
     (F1|F2|F3|F4)
         reply=( -1 "$key" )
@@ -176,7 +171,7 @@ else
 case "$key" in
     ($'\n'|ENTER)
         search=0
-        _hlist_cursor_visibility 0
+        _zzlist_cursor_visibility 0
         ;;
     ($'\C-L')
         reply=( -1 REDRAW )
@@ -188,51 +183,51 @@ case "$key" in
 
     (UP|$'\C-P')
         [ "$current_idx" -gt 1 ] && current_idx=current_idx-1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (DOWN|$'\C-N')
         [ "$current_idx" -lt "$last_element" ] && current_idx=current_idx+1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (PPAGE)
         current_idx=current_idx-page_height
         [ "$current_idx" -lt 1 ] && current_idx=1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (NPAGE)
         current_idx=current_idx+page_height
         [ "$current_idx" -gt "$last_element" ] && current_idx=last_element;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     ($'\C-U')
         current_idx=current_idx-page_height/2
         [ "$current_idx" -lt 1 ] && current_idx=1;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     ($'\C-D')
         current_idx=current_idx+page_height/2
         [ "$current_idx" -gt "$last_element" ] && current_idx=last_element;
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (HOME)
         current_idx=1
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (END)
         current_idx=last_element
-        _hlist_compute_first_to_show_idx
+        _zzlist_compute_first_to_show_idx
         ;;
     (LEFT)
-        if [ "$HLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
-            (( HLIST_CURRENT_SEGMENT = nseg - 1 ))
-            [ "$HLIST_CURRENT_SEGMENT" -le 0 ] && HLIST_CURRENT_SEGMENT=1
+        if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
+            (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
+            [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
         else
-            (( HLIST_CURRENT_SEGMENT = HLIST_CURRENT_SEGMENT - 1 ))
+            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
         fi
         ;;
     (RIGHT)
-        (( HLIST_CURRENT_SEGMENT = HLIST_CURRENT_SEGMENT + 1 ))
-        [ "$HLIST_CURRENT_SEGMENT" -gt "$nseg" ] && HLIST_CURRENT_SEGMENT="$nseg"
+        (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
+        [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
         ;;
     (F1|F2|F3|F4)
         reply=( -1 "$key" )
@@ -257,7 +252,7 @@ case "$key" in
     ($'\E')
         buffer=""
         search=0
-        _hlist_cursor_visibility 0
+        _zzlist_cursor_visibility 0
         ;;
     ($'\C-O')
         uniq_mode=1-uniq_mode
