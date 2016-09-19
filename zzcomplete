@@ -37,7 +37,7 @@ zz-usetty-wrapper zz-list-wrapper ${(f)"$( man "$cmd" | col -b )"}
 integer pos="$CURSOR"
 integer size="${#ZZ_PB_WORDS}"
 integer newcursor
-buf=""
+local buf=""
 
 zle kill-buffer
 
