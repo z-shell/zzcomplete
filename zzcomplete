@@ -24,7 +24,7 @@ local cmd=""
 for (( i=1; i<=size; i++ )); do
     [ "$cmd" = "" ] && cmd="${ZZ_PB_WORDS[i]}"
     [ "$i" = "$ZZ_PB_SELECTED_WORD" ] && break
-    [ "$ZZ_PB_WORDS[i]" = ";" ] && cmd=""
+    [[ "${ZZ_PB_WORDS[i]}" = ";" || "${ZZ_PB_WORDS[i]}" = "|" ]] && cmd=""
 done
 
 local ZZLIST_WRAPPER_BIT=""
