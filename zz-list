@@ -191,7 +191,6 @@ if [[ -z "$ZZLIST_REMEMBER_STATE" || "$ZZLIST_REMEMBER_STATE" -eq 0 || "$ZZLIST_
     ZZLIST_TEXT_OFFSET=0
     ZZLIST_IS_UNIQ_MODE=0
     ZZLIST_CURRENT_SEGMENT=1 # This variable is responsible for horizontal indexing
-    typeset -gA ZZLIST_ACTIVE_SEGMENTS
     ZZLIST_ACTIVE_SEGMENTS=()
 
     # Zero - because it isn't known, unless we
