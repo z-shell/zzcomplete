@@ -50,7 +50,6 @@ _zz_wrapper_init_windows() {
     zcurses addwin main $(( term_height - 3 )) "$term_width" 0 0
     zcurses addwin status "3" "$term_width" $(( term_height - 3 )) 0
 
-    bold=1
     zcurses bg main "+bold" white/black
     zcurses bg status "+bold" white/black
 }
