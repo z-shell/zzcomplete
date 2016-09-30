@@ -4,10 +4,49 @@ zmodload zsh/curses
 
 setopt typesetsilent
 
-# Compute first to show index
+# Compute first to show index - exact page
 _zzlist_compute_first_to_show_idx() {
     from_what_idx_list_is_shown=0+((current_idx-1)/page_height)*page_height+1
 }
+
+# Calling this function means passing information
+# that we move up in the list (to lower index)
+# This means we can move page start as few as one
+# element up.
+_zzlist_compute_first_to_show_idx_up_many() {
+    if [[ "$current_idx" -lt "$from_what_idx_list_is_shown" ||
+        "$current_idx" -gt "$(( from_what_idx_list_is_shown + page_height -1 ))" ]]
+    then
+        from_what_idx_list_is_shown=from_what_idx_list_is_shown-7
+
+        # Fallback: in case of any problems compute exact page
+        if [[ "$from_what_idx_list_is_shown" -lt "0" ||
+            "$(( from_what_idx_list_is_shown + page_height -1 ))" -gt "$last_element" ]]
+        then
+            from_what_idx_list_is_shown=0+((current_idx-1)/page_height)*page_height+1
+        fi
+    fi
+}
+
+# Like above, but in opposite direction
+_zzlist_compute_first_to_show_idx_down_many() {
+    if [[ "$current_idx" -lt "$from_what_idx_list_is_shown" ||
+        "$current_idx" -gt "$(( from_what_idx_list_is_shown + page_height -1 ))" ]]
+    then
+        echo "Yes1 $from_what_idx_list_is_shown" >> /tmp/reply
+        from_what_idx_list_is_shown=from_what_idx_list_is_shown+7
+
+        echo "Yes2 $from_what_idx_list_is_shown" >> /tmp/reply
+
+        # Fallback: in case of any problems compute exact page
+        if [[ "$from_what_idx_list_is_shown" -lt "0" ||
+            "$(( from_what_idx_list_is_shown + page_height -1 ))" -gt "$last_element" ]]
+        then
+            from_what_idx_list_is_shown=0+((current_idx-1)/page_height)*page_height+1
+        fi
+    fi
+}
+
 
 typeset -ga reply
 reply=( -1 '' )
@@ -33,13 +72,25 @@ if [ "$search" = "0" ]; then
 case "$key" in
     (UP|k|$'\C-P')
         # Are there any elements before the current one?
-        [ "$current_idx" -gt 1 ] && current_idx=current_idx-1;
-        _zzlist_compute_first_to_show_idx
+        [ "$current_idx" -gt 1 ] && {
+            current_idx=current_idx-1
+            _zzlist_compute_first_to_show_idx_up_many
+        }
+        [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+            current_idx=current_idx-1
+            _zzlist_compute_first_to_show_idx_up_many
+        }
         ;;
     (DOWN|j|$'\C-N')
         # Are there any elements after the current one?
-        [ "$current_idx" -lt "$last_element" ] && current_idx=current_idx+1;
-        _zzlist_compute_first_to_show_idx
+        [ "$current_idx" -lt "$last_element" ] && {
+            current_idx=current_idx+1
+            _zzlist_compute_first_to_show_idx_down_many
+        }
+        [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+            current_idx=current_idx+1
+            _zzlist_compute_first_to_show_idx_down_many
+        }
         ;;
     (PPAGE|$'\b'|$'\C-?'|BACKSPACE)
         current_idx=current_idx-page_height
@@ -88,9 +139,6 @@ case "$key" in
             _zzlist_cursor_visibility 1
         fi
         ;;
-    ($'\t')
-        reply=( $current_idx LEAVE )
-        ;;
     ($'\C-L')
         reply=( -1 REDRAW )
         ;;
@@ -135,23 +183,66 @@ case "$key" in
     ('>'|'}')
         hscroll+=7
         ;;
-    (LEFT|'h')
-        if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
-            (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
-            [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
+    (LEFT|'h'|BTAB)
+        if [[ "$key" = "BTAB" && ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} = $current_idx ]]; then
+            [[ "$current_idx" -gt "1" ]] && {
+                current_idx=current_idx-1
+                ZZLIST_CURRENT_SEGMENT="100"
+                _zzlist_compute_first_to_show_idx_up_many
+            }
+            [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+                current_idx=current_idx-1
+                _zzlist_compute_first_to_show_idx_up_many
+            }
         else
-            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
+            if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
+                (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
+                [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
+            else
+                if [[ "$key" = "BTAB" && "$ZZLIST_CURRENT_SEGMENT" -eq "1" ]]; then
+                    [ "$current_idx" -gt "1" ] && {
+                        current_idx=current_idx-1
+                        ZZLIST_CURRENT_SEGMENT="100"
+                        _zzlist_compute_first_to_show_idx_up_many
+                    }
+                    [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+                        current_idx=current_idx-1
+                        _zzlist_compute_first_to_show_idx_up_many
+                    }
+                else
+                    (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
+                fi
+            fi
         fi
         ;;
-    (RIGHT|'l')
-        (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
-        [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
-        ;;
-    (SLEFT|'H')
-        reply=( "$ZZLIST_CURRENT_SEGMENT" MOVE_LEFT )
-        ;;
-    (SRIGHT|'L')
-        reply=( "$ZZLIST_CURRENT_SEGMENT" MOVE_RIGHT )
+    (RIGHT|'l'|$'\t')
+        if [[ "$key" = $'\t' && ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} = $current_idx ]]; then
+            [ "$current_idx" -lt "$last_element" ] && {
+                current_idx=current_idx+1
+                ZZLIST_CURRENT_SEGMENT=1
+                _zzlist_compute_first_to_show_idx_down_many
+            }
+            [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+                current_idx=current_idx+1
+                _zzlist_compute_first_to_show_idx_down_many
+            }
+        else
+            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
+            if [ "$key" = $'\t' ]; then
+                if [[ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]]; then
+                    [ "$current_idx" -lt "$last_element" ] && {
+                        current_idx=current_idx+1
+                        ZZLIST_CURRENT_SEGMENT="1"
+                        _zzlist_compute_first_to_show_idx_down_many
+                    }
+                    [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+                        current_idx=current_idx+1
+                        _zzlist_compute_first_to_show_idx_down_many
+                    }
+                fi
+            fi
+            [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
+        fi
         ;;
     (F1|F2|F3|F4)
         reply=( -1 "$key" )
@@ -182,12 +273,24 @@ case "$key" in
     #
 
     (UP|$'\C-P')
-        [ "$current_idx" -gt 1 ] && current_idx=current_idx-1;
-        _zzlist_compute_first_to_show_idx
+        [ "$current_idx" -gt 1 ] && {
+            current_idx=current_idx-1
+            _zzlist_compute_first_to_show_idx_up_many
+        }
+        [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+            current_idx=current_idx-1
+            _zzlist_compute_first_to_show_idx_up_many
+        }
         ;;
     (DOWN|$'\C-N')
-        [ "$current_idx" -lt "$last_element" ] && current_idx=current_idx+1;
-        _zzlist_compute_first_to_show_idx
+        [ "$current_idx" -lt "$last_element" ] && {
+            current_idx=current_idx+1;
+            _zzlist_compute_first_to_show_idx_down_many
+        }
+        [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+            current_idx=current_idx+1
+            _zzlist_compute_first_to_show_idx_down_many
+        }
         ;;
     (PPAGE)
         current_idx=current_idx-page_height
@@ -217,17 +320,66 @@ case "$key" in
         current_idx=last_element
         _zzlist_compute_first_to_show_idx
         ;;
-    (LEFT)
-        if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
-            (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
-            [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
+    (LEFT|BTAB)
+        if [[ "$key" = "BTAB" && ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} = $current_idx ]]; then
+            [[ "$current_idx" -gt "1" ]] && {
+                current_idx=current_idx-1
+                ZZLIST_CURRENT_SEGMENT="100"
+                _zzlist_compute_first_to_show_idx_up_many
+            }
+            [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+                current_idx=current_idx-1
+                _zzlist_compute_first_to_show_idx_up_many
+            }
         else
-            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
+            if [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]; then
+                (( ZZLIST_CURRENT_SEGMENT = nseg - 1 ))
+                [ "$ZZLIST_CURRENT_SEGMENT" -le 0 ] && ZZLIST_CURRENT_SEGMENT=1
+            else
+                if [[ "$key" = BTAB && "$ZZLIST_CURRENT_SEGMENT" -eq "1" ]]; then
+                    [ "$current_idx" -gt "1" ] && {
+                        current_idx=current_idx-1
+                        ZZLIST_CURRENT_SEGMENT="100"
+                        _zzlist_compute_first_to_show_idx_up_many
+                    }
+                    [[ -z "${list[$current_idx]}" && "$current_idx" -gt 1 ]] && {
+                        current_idx=current_idx-1
+                        _zzlist_compute_first_to_show_idx_up_many
+                    }
+                else
+                    (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT - 1 ))
+                fi
+            fi
         fi
         ;;
-    (RIGHT)
-        (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
-        [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
+    (RIGHT|$'\t')
+        if [[ "$key" = $'\t' && ${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$current_idx]} = $current_idx ]]; then
+            [ "$current_idx" -lt "$last_element" ] && {
+                current_idx=current_idx+1
+                ZZLIST_CURRENT_SEGMENT=1
+                _zzlist_compute_first_to_show_idx_down_many
+            }
+            [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+                current_idx=current_idx+1
+                _zzlist_compute_first_to_show_idx_down_many
+            }
+        else
+            (( ZZLIST_CURRENT_SEGMENT = ZZLIST_CURRENT_SEGMENT + 1 ))
+            if [ "$key" = $'\t' ]; then
+                if [[ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ]]; then
+                    [ "$current_idx" -lt "$last_element" ] && {
+                        current_idx=current_idx+1
+                        ZZLIST_CURRENT_SEGMENT="1"
+                        _zzlist_compute_first_to_show_idx_down_many
+                    }
+                    [[ -z "${list[$current_idx]}" && "$current_idx" -lt "$last_element" ]] && {
+                        current_idx=current_idx+1
+                        _zzlist_compute_first_to_show_idx_down_many
+                    }
+                fi
+            fi
+            [ "$ZZLIST_CURRENT_SEGMENT" -gt "$nseg" ] && ZZLIST_CURRENT_SEGMENT="$nseg"
+        fi
         ;;
     (F1|F2|F3|F4)
         reply=( -1 "$key" )

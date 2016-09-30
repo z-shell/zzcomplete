@@ -76,7 +76,13 @@ _zzlist_compute_user_vars_difference() {
 _zzlist_verify_vars() {
     [ "$ZZLIST_CURRENT_IDX" -gt "$last_element" ] && ZZLIST_CURRENT_IDX="$last_element"
     [[ "$ZZLIST_CURRENT_IDX" -eq 0 && "$last_element" -ne 0 ]] && ZZLIST_CURRENT_IDX=1
-    (( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN=0+((ZZLIST_CURRENT_IDX-1)/page_height)*page_height+1 ))
+
+    # Verify that element is just visible, if not then compute exact page
+    if [[ "$ZZLIST_CURRENT_IDX" -lt "$ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN" ||
+        "$ZZLIST_CURRENT_IDX" -gt "$(( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + page_height + 1 ))" ]]
+    then
+        (( ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN = ((ZZLIST_CURRENT_IDX-1)/page_height) * page_height + 1 ))
+    fi
 }
 
 # Compute the variables which are shown to the user
@@ -110,7 +116,7 @@ _zzlist_mark_current_segment_in_current_element() {
         [ "${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$ZZLIST_CURRENT_IDX]}" = "$ZZLIST_CURRENT_IDX" ] && return
 
         # There will be no colorifying for current element
-        integer ZZLIST_CURRENT_PAGE_IDX=$(( (ZZLIST_CURRENT_IDX-1)%page_height+1 ))
+        integer ZZLIST_CURRENT_PAGE_IDX=$(( ZZLIST_CURRENT_IDX - ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN +  ))
         local element="$list[ZZLIST_CURRENT_IDX]"
         local output=""
 
@@ -320,7 +326,7 @@ while (( 1 )); do
         [ "$#disp_list2" -gt 0 ] && _zzlist_mark_current_segment_in_current_element
 
         # Output colored list
-        zz-list-draw "$(( (ZZLIST_CURRENT_IDX-1) % page_height + 1 ))" \
+        zz-list-draw "$(( ZZLIST_CURRENT_IDX - ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + 1 ))" \
             "$page_height" "$page_width" 1 2 "$ZZLIST_TEXT_OFFSET" "$wname_main" \
             "$disp_list2[@]"
     else
@@ -382,7 +388,7 @@ while (( 1 )); do
         [ "$#disp_list2" -gt 0 ] && _zzlist_mark_current_segment_in_current_element
 
         # Output the list
-        zz-list-draw "$(( (ZZLIST_CURRENT_IDX-1) % page_height + 1 ))" \
+        zz-list-draw "$(( ZZLIST_CURRENT_IDX - ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + 1 ))" \
             "$page_height" "$page_width" 1 2 "$ZZLIST_TEXT_OFFSET" "$wname_main" \
             "$disp_list2[@]"
     fi
