@@ -130,7 +130,7 @@ case "$key" in
             reply=( $current_idx SELECT )
         fi
         ;;
-    (q)
+    (q|Q)
         reply=( -1 QUIT )
         ;;
     (/)
