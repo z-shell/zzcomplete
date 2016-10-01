@@ -116,7 +116,7 @@ _zzlist_mark_current_segment_in_current_element() {
         [ "${ZZLIST_NONSELECTABLE_ELEMENTS[(r)$ZZLIST_CURRENT_IDX]}" = "$ZZLIST_CURRENT_IDX" ] && return
 
         # There will be no colorifying for current element
-        integer ZZLIST_CURRENT_PAGE_IDX=$(( ZZLIST_CURRENT_IDX - ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN +  ))
+        integer ZZLIST_CURRENT_PAGE_IDX=$(( ZZLIST_CURRENT_IDX - ZZLIST_FROM_WHAT_IDX_LIST_IS_SHOWN + 1 ))
         local element="$list[ZZLIST_CURRENT_IDX]"
         local output=""
 
