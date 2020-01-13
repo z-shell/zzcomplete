@@ -4,6 +4,11 @@
 # Pastes output of zz-list into current cursor position
 #
 
+if (( !${+functions[-zui_std_cleanup]} )) {
+    echo "ZZ Complete uses ZUI plugin, please load https://github.com/zdharma/zui/ with your plugin manager, or source it."
+    return 1
+}
+
 -zui_std_cleanup deserialize:"zui-demo-zzcomplete"
 -zui_std_init app:"zui-demo-zzcomplete" app_name:"ZZ-Complete"
 emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal -o noshortloops
