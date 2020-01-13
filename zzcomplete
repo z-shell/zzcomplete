@@ -4,7 +4,16 @@
 # Pastes output of zz-list into current cursor position
 #
 
-setopt localoptions typesetsilent
+-zui_std_cleanup deserialize:"zui-demo-zzcomplete"
+-zui_std_init app:"zui-demo-zzcomplete" app_name:"ZUI ZZ-Complete"
+emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal
+-zui_std_init2 # after emulate -LR
+
+-zui_std_store_default_app_config b:border 1
+-zui_std_store_default_app_config s:select_mode "quit"   # Quit event loop on text-selection
+-zui_std_store_default_app_config s:text_mode "all"       # Select whole lines
+-zui_std_store_default_app_config b:text_select 1        # Allow selection of text
+-zui_std_store_default_app_config s:status_size 1        # The size of the status window
 
 autoload zz-process-buffer zz-usetty-wrapper zz-list zz-list-input zz-list-draw
 
@@ -27,8 +36,10 @@ for (( i=1; i<=size; i++ )); do
     [[ "${ZZ_PB_WORDS[i]}" = ";" || "${ZZ_PB_WORDS[i]}" = "|" ]] && cmd=""
 done
 
-local ZZLIST_WRAPPER_BIT=""
-zz-usetty-wrapper zz-list-wrapper ${(f)"$( man "$cmd" | col -b )"}
+local -a man
+man=( "${(@f)"$( man "$cmd" | col -b )"}" )
+
+zui-event-loop a:man
 
 #
 # Rebuilding buffer
@@ -61,7 +72,7 @@ for (( i=1; i<=size; i++ )); do
             # New word is introduced at position i+1, after current word
             # It doesn't have word beginnings and spaces assigned
             # It has to take spaces from word next to it, i+2
-            ZZ_PB_WORDS[i+1]="$ZZLIST_WRAPPER_BIT"
+            ZZ_PB_WORDS[i+1]="$REPLY"
             ZZ_PB_WORDS_BEGINNINGS[i+1]="$(( pos + 1 ))"
 
             # Now split spaces
