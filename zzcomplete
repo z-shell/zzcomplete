@@ -68,6 +68,19 @@ map=( ${man[1]##[[:space:]]##} "${(@)man[2,-1]}" )
     return 1
 }
 
+integer pos=$CURSOR
+integer size=${#ZZ_PB_WORDS}
+if (( pos <= (ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] + 
+    ${#ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]} - 1)
+)); then
+    typeset -gA ZUI
+    ZUI[SEARCH_MODE]=1
+    ZUI[SEARCH_BUFFER]=${ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]}
+else
+    ZUI[SEARCH_MODE]=0
+    ZUI[SEARCH_BUFFER]=
+fi
+
 zui-event-loop a:man
 
 #
