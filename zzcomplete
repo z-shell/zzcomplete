@@ -61,6 +61,7 @@ done
 
 local -a man
 man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
+map=( ${man[1]##[[:space:]]##} "${(@)man[2,-1]}" )
 
 [[ $man = [[:space:]]# ]] && {
     zz-deploy-code "zle -M 'No man page for $cmd'"
