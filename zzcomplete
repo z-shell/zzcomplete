@@ -110,7 +110,7 @@ for (( i=1; i<=size; i++ )); do
             newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} - 1 ))
 
         else
-            ZZ_PB_WORDS[i]="$ZZLIST_WRAPPER_BIT"
+            ZZ_PB_WORDS[i]="$REPLY"
 
             # Cursor will be at end of newly substituted word
             newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1 ))
