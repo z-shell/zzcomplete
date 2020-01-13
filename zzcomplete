@@ -82,6 +82,7 @@ else
 fi
 
 zui-event-loop a:man
+-zui_std_cleanup serialize
 
 #
 # Rebuilding buffer
