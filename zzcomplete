@@ -15,7 +15,7 @@ emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal
 -zui_std_store_default_app_config b:text_select 1        # Allow selection of text
 -zui_std_store_default_app_config s:status_size 1        # The size of the status window
 
-autoload zz-process-buffer zz-usetty-wrapper zz-list zz-list-input zz-list-draw
+autoload zz-process-buffer
 
 typeset -g zzcompl_ef
 zzcompl_ef=( ${(k)functions} )
