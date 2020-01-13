@@ -6,7 +6,7 @@
 
 -zui_std_cleanup deserialize:"zui-demo-zzcomplete"
 -zui_std_init app:"zui-demo-zzcomplete" app_name:"ZZ-Complete"
-emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal
+emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal -o noshortloops
 -zui_std_init2 # after emulate -LR
 
 -zui_std_store_default_app_config b:border 1
