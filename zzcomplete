@@ -87,8 +87,6 @@ zui-event-loop a:man
 # Rebuilding buffer
 #
 
-integer pos=$CURSOR
-integer size=${#ZZ_PB_WORDS}
 integer newcursor
 local buf=""
 
