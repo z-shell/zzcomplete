@@ -44,6 +44,11 @@ done
 local -a man
 man=( "${(@f)"$( man "$cmd" | col -b )"}" )
 
+[[ "$man" = [[:space:]]# ]] && {
+    zz-deploy-code "zle -M 'No man page for $cmd'"
+    return 0
+}
+
 zui-event-loop a:man
 
 #
