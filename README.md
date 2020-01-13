@@ -26,6 +26,11 @@ and `Ctrl`/`Cmd`+`minus`.
 
 ## Instalation
 
+### Dependencies
+
+The plugin needs also [ZUI](https://github.com/zdharma/ZUI) plugin and a Zsh
+that is built with the `zsh/curses` module.
+
 ### Manual
 
 Clone the Repository.
