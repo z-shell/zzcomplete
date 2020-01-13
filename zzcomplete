@@ -42,21 +42,21 @@ local ZZ_PB_WORDS="" ZZ_PB_WORDS_BEGINNINGS="" ZZ_PB_SPACES=""
 local ZZ_PB_SELECTED_WORD="" ZZ_PB_LEFT="" ZZ_PB_RIGHT=""
 
 # Process current buffer
-zz-process-buffer "$BUFFER"
+zz-process-buffer $BUFFER
 
 # Select command for man
-integer i size="${#ZZ_PB_WORDS}"
+integer i size=${#ZZ_PB_WORDS}
 local cmd=""
 for (( i=1; i<=size; i++ )); do
-    [ "$cmd" = "" ] && cmd="${ZZ_PB_WORDS[i]}"
-    [ "$i" = "$ZZ_PB_SELECTED_WORD" ] && break
-    [[ "${ZZ_PB_WORDS[i]}" = ";" || "${ZZ_PB_WORDS[i]}" = "|" ]] && cmd=""
+    [[ $cmd = "" ]] && cmd=${ZZ_PB_WORDS[i]}
+    [[ $i = $ZZ_PB_SELECTED_WORD ]] && break
+    [[ ${ZZ_PB_WORDS[i]} = ";" || ${ZZ_PB_WORDS[i]} = "|" ]] && cmd=""
 done
 
 local -a man
 man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
 
-[[ "$man" = [[:space:]]# ]] && {
+[[ $man = [[:space:]]# ]] && {
     zz-deploy-code "zle -M 'No man page for $cmd'"
     return 1
 }
@@ -67,8 +67,8 @@ zui-event-loop a:man
 # Rebuilding buffer
 #
 
-integer pos="$CURSOR"
-integer size="${#ZZ_PB_WORDS}"
+integer pos=$CURSOR
+integer size=${#ZZ_PB_WORDS}
 integer newcursor
 local buf=""
 
@@ -78,23 +78,23 @@ integer i j
 for (( i=1; i<=size; i++ )); do
     # Check if we're at (i.e. directly at or after,
     # when after are just spaces) current word
-    if [ "$i" = "$ZZ_PB_SELECTED_WORD" ]; then
+    if [[ $i = $ZZ_PB_SELECTED_WORD ]]; then
         # Check if we're at the word itself,
         # or at some distance after it
         if (( pos > (ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1) )); then
             # We need to introduce new word
             # First move all words and spaces forward
             for (( j=size; j>=i+1; j-- )); do
-                ZZ_PB_WORDS[j+1]="${ZZ_PB_WORDS[j]}"
-                ZZ_PB_SPACES[j+1]="${ZZ_PB_SPACES[j]}"
-                ZZ_PB_WORDS_BEGINNINGS[j+1]="${ZZ_PB_WORDS_BEGINNINGS[j]}"
+                ZZ_PB_WORDS[j+1]=${ZZ_PB_WORDS[j]}
+                ZZ_PB_SPACES[j+1]=${ZZ_PB_SPACES[j]}
+                ZZ_PB_WORDS_BEGINNINGS[j+1]=${ZZ_PB_WORDS_BEGINNINGS[j]}
             done
             size+=1
 
             # New word is introduced at position i+1, after current word
             # It doesn't have word beginnings and spaces assigned
             # It has to take spaces from word next to it, i+2
-            ZZ_PB_WORDS[i+1]="$REPLY"
+            ZZ_PB_WORDS[i+1]=$REPLY
             ZZ_PB_WORDS_BEGINNINGS[i+1]="$(( pos + 1 ))"
 
             # Now split spaces
@@ -110,7 +110,7 @@ for (( i=1; i<=size; i++ )); do
             newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} - 1 ))
 
         else
-            ZZ_PB_WORDS[i]="$REPLY"
+            ZZ_PB_WORDS[i]=$REPLY
 
             # Cursor will be at end of newly substituted word
             newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1 ))
@@ -118,13 +118,13 @@ for (( i=1; i<=size; i++ )); do
             # Update word beginnings of following words – skipped
         fi
     fi
-    buf+="$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]"
+    buf+=$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]
 done
 
 # Append final white spaces
-buf+="$ZZ_PB_SPACES[i]"
-BUFFER="$buf"
-CURSOR="$newcursor"
+buf+=$ZZ_PB_SPACES[i]
+BUFFER=$buf
+CURSOR=$newcursor
 
 zle redisplay
 
