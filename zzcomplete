@@ -9,6 +9,13 @@
 emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal -o noshortloops
 -zui_std_init2 # after emulate -LR
 
+zmodload zsh/curses &>/dev/null || {
+    print "ERROR: no zsh/curses module available."
+    print "You can build the module yourself by following the instructions at:"
+    print "https://github.com/zplugin/zplugin-console#solving-the-lack-of-zshcurses-module-with-zplugin"
+    return 1
+}
+
 -zui_std_store_default_app_config b:border 1
 -zui_std_store_default_app_config s:select_mode "quit"   # Quit event loop on text-selection
 -zui_std_store_default_app_config s:text_mode "all"       # Select whole lines
