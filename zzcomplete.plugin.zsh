@@ -5,9 +5,10 @@
 # to ~/.zshrc.
 #
 
-0="${(%):-%N}" # this gives immunity to functionargzero being unset
-REPO_DIR="${0%/*}"
-CONFIG_DIR="$HOME/.config/zzcomplete"
+# According to plugin standard, see:
+# http://zdharma.org/Zsh-100-Commits-Club/Zsh-Plugin-Standard.html#zero-handling
+0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
+0="${${(M)0:#/*}:-$PWD/$0}"
 
 #
 # Update FPATH if:
