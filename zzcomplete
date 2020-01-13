@@ -53,6 +53,11 @@ for (( i=1; i<=size; i++ )); do
     [[ ${ZZ_PB_WORDS[i]} = ";" || ${ZZ_PB_WORDS[i]} = "|" ]] && cmd=""
 done
 
+[[ -z $cmd ]] && {
+    zz-deploy-code "zle -M 'Please enter a command first'"
+    return 1
+}
+
 local -a man
 man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
 
