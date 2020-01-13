@@ -53,7 +53,7 @@ man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
 
 [[ "$man" = [[:space:]]# ]] && {
     zz-deploy-code "zle -M 'No man page for $cmd'"
-    return 0
+    return 1
 }
 
 zui-event-loop a:man
