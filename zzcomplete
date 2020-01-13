@@ -24,6 +24,7 @@ zmodload zsh/curses &>/dev/null || {
 -zui_std_store_default_app_config b:border 1
 -zui_std_store_default_app_config s:select_mode "quit"   # Quit event loop on text-selection
 -zui_std_store_default_app_config s:top_anchors "no"     # No top anchors
+-zui_std_store_default_app_config s:text_mode "all"      # Select whole lines
 -zui_std_store_default_app_config b:text_select 1        # Allow selection of text
 -zui_std_store_default_app_config s:status_size 1        # The size of the status window
 
