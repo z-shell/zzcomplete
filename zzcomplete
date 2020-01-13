@@ -42,7 +42,7 @@ for (( i=1; i<=size; i++ )); do
 done
 
 local -a man
-man=( "${(@f)"$( man "$cmd" | col -b )"}" )
+man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
 
 [[ "$man" = [[:space:]]# ]] && {
     zz-deploy-code "zle -M 'No man page for $cmd'"
