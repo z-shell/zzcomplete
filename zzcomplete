@@ -17,6 +17,11 @@ emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal
 
 autoload zz-process-buffer zz-usetty-wrapper zz-list zz-list-input zz-list-draw
 
+typeset -g zzcompl_ef
+zzcompl_ef=( ${(k)functions} )
+trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef" EXIT
+trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef; return 1" INT
+
 local curcontext=":zle:$WIDGET"
 local MATCH MBEGIN MEND i
 
