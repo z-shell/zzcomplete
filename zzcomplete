@@ -35,8 +35,10 @@ zzcompl_ef=( ${(k)functions} )
 trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef" EXIT
 trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef; return 1" INT
 
+local MATCH REPLY i; integer MBEGIN MEND
+local -a match mbegin mend reply
+
 local curcontext=":zle:$WIDGET"
-local MATCH MBEGIN MEND i
 
 # Prepare output variables for zz-process-buffer
 local ZZ_PB_WORDS="" ZZ_PB_WORDS_BEGINNINGS="" ZZ_PB_SPACES=""
