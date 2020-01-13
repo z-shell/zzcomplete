@@ -19,6 +19,9 @@ With ZZ Complete, the user can:
 
 ## Asciicast
 
+You can resize the video like a normal web page, i.e.: with `Ctrl`/`Cmd`–`plus`
+and `Ctrl`/`Cmd`–`minus`.
+
 [![asciicast](https://asciinema.org/a/293329.svg)](https://asciinema.org/a/293329)
 
 ## Instalation
