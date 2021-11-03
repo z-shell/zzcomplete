@@ -1,0 +1,153 @@
+#
+# Started from zle
+# Displays zz-list with manual for the first word on the line
+# Pastes output of zz-list into current cursor position
+#
+
+if (( !${+functions[-zui_std_cleanup]} )) {
+    echo "ZZ Complete uses ZUI plugin, please load https://github.com/zdharma/zui/ with your plugin manager, or source it."
+    return 1
+}
+
+-zui_std_cleanup deserialize:"zui-demo-zzcomplete"
+-zui_std_init app:"zui-demo-zzcomplete" app_name:"ZZ-Complete"
+emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal -o noshortloops
+-zui_std_init2 # after emulate -LR
+
+zmodload zsh/curses &>/dev/null || {
+    print "ERROR: no zsh/curses module available."
+    print "You can build the module yourself by following the instructions at:"
+    print "https://github.com/zplugin/zplugin-console#solving-the-lack-of-zshcurses-module-with-zplugin"
+    return 1
+}
+
+-zui_std_store_default_app_config b:border 1
+-zui_std_store_default_app_config s:select_mode "quit"   # Quit event loop on text-selection
+-zui_std_store_default_app_config s:top_anchors "no"     # No top anchors
+-zui_std_store_default_app_config s:text_mode "all"      # Select whole lines
+-zui_std_store_default_app_config b:text_select 1        # Allow selection of text
+-zui_std_store_default_app_config s:status_size 1        # The size of the status window
+
+autoload zz-process-buffer
+
+typeset -g zzcompl_ef
+zzcompl_ef=( ${(k)functions} )
+trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef" EXIT
+trap "unset -f -- \"\${(k)functions[@]:|zzcompl_ef}\" &>/dev/null; unset zzcompl_ef; return 1" INT
+
+local MATCH REPLY i; integer MBEGIN MEND
+local -a match mbegin mend reply
+
+local curcontext=":zle:$WIDGET"
+
+# Prepare output variables for zz-process-buffer
+local ZZ_PB_WORDS="" ZZ_PB_WORDS_BEGINNINGS="" ZZ_PB_SPACES=""
+local ZZ_PB_SELECTED_WORD="" ZZ_PB_LEFT="" ZZ_PB_RIGHT=""
+
+# Process current buffer
+zz-process-buffer $BUFFER
+
+# Select command for man
+integer i size=${#ZZ_PB_WORDS}
+local cmd=""
+for (( i=1; i<=size; i++ )); do
+    [[ $cmd = "" ]] && cmd=${ZZ_PB_WORDS[i]}
+    [[ $i = $ZZ_PB_SELECTED_WORD ]] && break
+    [[ ${ZZ_PB_WORDS[i]} = ";" || ${ZZ_PB_WORDS[i]} = "|" ]] && cmd=""
+done
+
+[[ -z $cmd ]] && {
+    zz-deploy-code "zle -M 'Please enter a command first'"
+    return 1
+}
+
+local -a man
+man=( "${(@f)"$( man "$cmd" 2>/dev/null | col -b )"}" )
+man=( ${man[1]##[[:space:]]##} "${(@)man[2,-1]}" )
+
+[[ $man = [[:space:]]# ]] && {
+    zz-deploy-code "zle -M 'No man page for $cmd'"
+    return 1
+}
+
+typeset -gA ZUI
+integer pos=$CURSOR
+integer size=${#ZZ_PB_WORDS}
+if (( pos <= (ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] + 
+    ${#ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]} - 1)
+)); then
+    ZUI[SEARCH_MODE]=1
+    ZUI[SEARCH_BUFFER]=${ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]}
+else
+    ZUI[SEARCH_MODE]=0
+    ZUI[SEARCH_BUFFER]=
+fi
+ZUI[CURRENT_IDX]=1
+
+zui-event-loop a:man
+-zui_std_cleanup serialize
+
+#
+# Rebuilding buffer
+#
+
+integer newcursor
+local buf=""
+
+zle kill-buffer
+
+integer i j
+for (( i=1; i<=size; i++ )); do
+    # Check if we're at (i.e. directly at or after,
+    # when after are just spaces) current word
+    if [[ $i = $ZZ_PB_SELECTED_WORD ]]; then
+        # Check if we're at the word itself,
+        # or at some distance after it
+        if (( pos > (ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1) )); then
+            # We need to introduce new word
+            # First move all words and spaces forward
+            for (( j=size; j>=i+1; j-- )); do
+                ZZ_PB_WORDS[j+1]=${ZZ_PB_WORDS[j]}
+                ZZ_PB_SPACES[j+1]=${ZZ_PB_SPACES[j]}
+                ZZ_PB_WORDS_BEGINNINGS[j+1]=${ZZ_PB_WORDS_BEGINNINGS[j]}
+            done
+            size+=1
+
+            # New word is introduced at position i+1, after current word
+            # It doesn't have word beginnings and spaces assigned
+            # It has to take spaces from word next to it, i+2
+            ZZ_PB_WORDS[i+1]=$REPLY
+            ZZ_PB_WORDS_BEGINNINGS[i+1]="$(( pos + 1 ))"
+
+            # Now split spaces
+            # cursor_spaces: spaces from current word to the cursor
+            integer cursor_spaces=$(( pos - ZZ_PB_WORDS_BEGINNINGS[i] - ${#ZZ_PB_WORDS[i]} + 1 ))
+            # take that from spaces of word "next" in: current NEW next
+            integer after_spaces=$(( ZZ_PB_SPACES[i+2] - cursor_spaces ))
+            local empty=""
+            ZZ_PB_SPACES[i+1]="${(l:cursor_spaces:: :)empty}"
+            ZZ_PB_SPACES[i+2]="${(l:after_spaces:: :)empty}"
+
+            # Cursor will be at end of newly added word
+            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i+1] + ${#ZZ_PB_WORDS[i+1]} - 1 ))
+
+        else
+            ZZ_PB_WORDS[i]=$REPLY
+
+            # Cursor will be at end of newly substituted word
+            newcursor=$(( ZZ_PB_WORDS_BEGINNINGS[i] + ${#ZZ_PB_WORDS[i]} - 1 ))
+
+            # Update word beginnings of following words – skipped
+        fi
+    fi
+    buf+=$ZZ_PB_SPACES[i]$ZZ_PB_WORDS[i]
+done
+
+# Append final white spaces
+buf+=$ZZ_PB_SPACES[i]
+BUFFER=$buf
+CURSOR=$newcursor
+
+zle redisplay
+
+# vim:ft=zsh
