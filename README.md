@@ -1,4 +1,4 @@
-# ZZ Complete
+# `ZZCOMPLETE`
 
 ## Introduction
 
@@ -28,7 +28,7 @@ and `Ctrl`/`Cmd`+`minus`.
 
 ### Dependencies
 
-The plugin needs also [ZUI](https://github.com/zdharma/ZUI) plugin and a Zsh
+The plugin needs also [ZUI](https://github.com/z-shell/zui) plugin and a Zsh
 that is built with the `zsh/curses` module.
 
 ### Manual
@@ -36,7 +36,7 @@ that is built with the `zsh/curses` module.
 Clone the Repository.
 
 ```zsh
-git clone https://github.com/zdharma/zzcomplete ~/path/to/zzcomplete
+git clone https://github.com/z-shell/zzcomplete ~/path/to/zzcomplete
 ```
 
 And add the following to your `zshrc` file.
@@ -49,7 +49,7 @@ source ~/path/to/zzcomplete/zzcomplete.plugin.zsh
 Add the following to your `zshrc` file.
 
 ```zsh
-zplugin light zdharma/zzcomplete
+zplugin light z-shell/zzcomplete
 ```
 
 ### Antigen
@@ -57,7 +57,7 @@ zplugin light zdharma/zzcomplete
 Add the following to your `zshrc` file.
 
 ```zsh
-antigen bundle zdharma/zzcomplete
+antigen bundle z-shell/zzcomplete
 ```
 
 ### Zgen
@@ -66,7 +66,7 @@ Add the following to your `.zshrc` file in the same place you're doing
 your other `zgen load` calls in.
 
 ```
-zgen load zdharma/zzcomplete
+zgen load z-shell/zzcomplete
 ```
 
 ### Oh-My-Zsh
@@ -74,17 +74,9 @@ zgen load zdharma/zzcomplete
 Clone the Repository.
 
 ```
-git clone https://github.com/zdharma/zzcomplete.git \
+git clone https://github.com/z-shell/zzcomplete.git \
   ~ZSH_CUSTOM/plugins/zzcomplete
 ```
 
 And add `zzcomplete` to your plugin list.
-
-## IRC Channel
-
-Channel `#zplugin@freenode` is a support place for all author's projects. Connect to:
-[chat.freenode.net:6697](ircs://chat.freenode.net:6697/%23zplugin) (SSL) or [chat.freenode.net:6667](irc://chat.freenode.net:6667/%23zplugin)
- and join #zplugin.
-
-Following is a quick access via Webchat [![IRC](https://kiwiirc.com/buttons/chat.freenode.net/zplugin.png)](https://kiwiirc.com/client/chat.freenode.net:+6697/#zplugin)
 
