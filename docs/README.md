@@ -1,4 +1,15 @@
-# `ZZCOMPLETE`
+<h1> ZZ Complete </h1>
+
+- [Introduction](#introduction)
+- [Motivation](#motivation)
+- [Asciicast](#asciicast)
+- [Instalation](#instalation)
+  - [Dependencies](#dependencies)
+  - [Manual](#manual)
+  - [ZI](#zi)
+  - [Antigen](#antigen)
+  - [Zgen](#zgen)
+  - [Oh-My-Zsh](#oh-my-zsh)
 
 ## Introduction
 
@@ -40,16 +51,17 @@ git clone https://github.com/z-shell/zzcomplete ~/path/to/zzcomplete
 ```
 
 And add the following to your `zshrc` file.
+
 ```zsh
 source ~/path/to/zzcomplete/zzcomplete.plugin.zsh
 ```
 
-### Zplugin
+### ZI
 
 Add the following to your `zshrc` file.
 
 ```zsh
-zplugin light z-shell/zzcomplete
+zi light z-shell/zzcomplete
 ```
 
 ### Antigen
@@ -79,4 +91,3 @@ git clone https://github.com/z-shell/zzcomplete.git \
 ```
 
 And add `zzcomplete` to your plugin list.
-
