@@ -78,7 +78,7 @@ for (( i=1; i<=nwords; i++ )); do
     # Visual cursor right after letters (-ge) -> enough to select current word
     char_count=char_count+"$#word"
     [[ "$ZZ_PB_SELECTED_WORD" -eq "-1" && "$char_count" -ge "$cursor" ]] && ZZ_PB_SELECTED_WORD="$i"
-done 
+done
 
 # What's left in $buf can be only white spaces
 char_count=char_count+"$#buf"
@@ -92,5 +92,3 @@ integer diff=$(( cursor - ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] + 1 ))
 word="${ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]}"
 ZZ_PB_LEFT="${word[1,diff]}"
 ZZ_PB_RIGHT="${word[diff+1,-1]}"
-
-# vim:ft=zsh
