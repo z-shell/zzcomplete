@@ -5,7 +5,7 @@
 #
 
 if (( !${+functions[-zui_std_cleanup]} )) {
-    echo "ZZ Complete uses ZUI plugin, please load https://github.com/zdharma/zui/ with your plugin manager, or source it."
+    echo "ZZ Complete uses ZUI plugin, please load https://github.com/z-shell/zui/ with your plugin manager, or source it."
     return 1
 }
 
@@ -17,7 +17,7 @@ emulate -LR zsh -o extendedglob -o typesetsilent -o warncreateglobal -o noshortl
 zmodload zsh/curses &>/dev/null || {
     print "ERROR: no zsh/curses module available."
     print "You can build the module yourself by following the instructions at:"
-    print "https://github.com/zplugin/zplugin-console#solving-the-lack-of-zshcurses-module-with-zplugin"
+    print "https://github.com/z-shell/zi-console"
     return 1
 }
 
@@ -73,7 +73,7 @@ man=( ${man[1]##[[:space:]]##} "${(@)man[2,-1]}" )
 typeset -gA ZUI
 integer pos=$CURSOR
 integer size=${#ZZ_PB_WORDS}
-if (( pos <= (ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] + 
+if (( pos <= (ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] +
     ${#ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]} - 1)
 )); then
     ZUI[SEARCH_MODE]=1
@@ -149,5 +149,3 @@ BUFFER=$buf
 CURSOR=$newcursor
 
 zle redisplay
-
-# vim:ft=zsh
