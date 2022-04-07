@@ -1,3 +1,5 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+#
 # Input:
 # $1 - optional buffer to process (default is $BUFFER)
 # $2 - optional parameter containing cursor (default is $CURSOR)
@@ -92,3 +94,5 @@ integer diff=$(( cursor - ZZ_PB_WORDS_BEGINNINGS[ZZ_PB_SELECTED_WORD] + 1 ))
 word="${ZZ_PB_WORDS[ZZ_PB_SELECTED_WORD]}"
 ZZ_PB_LEFT="${word[1,diff]}"
 ZZ_PB_RIGHT="${word[diff+1,-1]}"
+
+# vim: ft=zsh sw=2 ts=2 et
