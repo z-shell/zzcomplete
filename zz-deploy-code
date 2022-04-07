@@ -1,3 +1,5 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+#
 # This Zshell function will execute the given code from a Zle context.
 # It has an optional delay first argument: "@sleep:<secnods with fractions>".
 # If given, then the code will wait in background before being executed, for
@@ -25,3 +27,5 @@ exec {THEFD} < <(
 )
 zle -N zz-deploy-code # idempotent
 zle -w -F "$THEFD" zz-deploy-code
+
+# vim: ft=zsh sw=2 ts=2 et
