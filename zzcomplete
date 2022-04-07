@@ -1,8 +1,8 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 #
 # Started from zle
 # Displays zz-list with manual for the first word on the line
 # Pastes output of zz-list into current cursor position
-#
 
 if (( !${+functions[-zui_std_cleanup]} )) {
     echo "ZZ Complete uses ZUI plugin, please load https://github.com/z-shell/zui/ with your plugin manager, or source it."
@@ -149,3 +149,5 @@ BUFFER=$buf
 CURSOR=$newcursor
 
 zle redisplay
+
+# vim: ft=zsh sw=2 ts=2 et
