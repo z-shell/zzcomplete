@@ -23,5 +23,3 @@ autoload zz-process-buffer zzcomplete zz-deploy-code
 
 zle -N zzcomplete
 bindkey '^F' zzcomplete
-
-# vim: ft=zsh sw=2 ts=2 et
