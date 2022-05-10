@@ -16,7 +16,7 @@ jobs:
     with:
 #     external_repository: ''
 #     publish_branch: ''
-#     publish_dir: ''
+     publish_dir: 'docs'
 #     destination_dir: ''
 #     cname: ''
      keep_files: true
