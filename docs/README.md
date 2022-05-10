@@ -1,25 +1,12 @@
-<h2 align="center">
+<h1></h1><table><tr><td><h2 align="center">
   <a href="https://github.com/z-shell/zi">
     <img src="https://github.com/z-shell/zi/raw/main/docs/images/logo.svg" alt="Logo" width="80" height="80" />
-  </a>
-❮ ZI ❯ Plugin - ZZ Complete
-</h2>
-
-- [Introduction](#introduction)
-- [Motivation](#motivation)
-- [Asciicast](#asciicast)
-- [Instalation](#instalation)
-  - [Dependencies](#dependencies)
-  - [Manual](#manual)
-  - [ZI](#zi)
-  - [Antigen](#antigen)
-  - [Zgen](#zgen)
-  - [Oh-My-Zsh](#oh-my-zsh)
-
-## Introduction
-
-Complete options from manual pages – press Ctrl-F to start the completer.
-
+  </a>❮ ZI ❯ Plugin - ZZ Complete</h2>
+<h3 align="center">Complete options from manual pages – press <kbd>Ctrl-F</kbd> to start the completer.</h3>
+  <a href="https://asciinema.org/a/293365" target="_blank"><img src="https://asciinema.org/a/293365.svg" /></a>
+  <p>You can resize the video with: <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>plus</kbd> and <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>minus</kbd>.</p>
+</td></td></table>
+  
 ## Motivation
 
 The completion of options has drawbacks:
@@ -32,13 +19,6 @@ With ZZ Complete, the user can:
 1. Search in the manual for arbitrary text related to the option.
 2. Then select the option that's located nearby the found text.
 3. Also, the user can read about the possible values of the options and select them too.
-
-## Asciicast
-
-You can resize the video like a normal web page, i.e.: with `Ctrl`/`Cmd`+`plus`
-and `Ctrl`/`Cmd`+`minus`.
-
-[![asciicast](https://asciinema.org/a/293365.svg)](https://asciinema.org/a/293365)
 
 ## Instalation
 
